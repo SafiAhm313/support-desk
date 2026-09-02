@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   OneToMany,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { Ticket } from '../tickets/ticket.entity';
 import { Comment } from '../comments/comment.entity';
 import { TicketEvent } from '../tickets/ticket-event.entity';
@@ -18,6 +19,7 @@ export class User {
   @Column({ type: 'varchar', unique: true })
   email: string;
 
+  @Exclude()
   @Column({ type: 'varchar', name: 'password_hash' })
   passwordHash: string;
 
