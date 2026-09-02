@@ -6,6 +6,8 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { TicketsModule } from './tickets/tickets.module';
+import { CommentsModule } from './comments/comments.module';
+import { TagsModule } from './tags/tags.module';
 import { User } from './users/user.entity';
 import { Ticket } from './tickets/ticket.entity';
 import { TicketEvent } from './tickets/ticket-event.entity';
@@ -28,6 +30,8 @@ import { Tag } from './tags/tag.entity';
     AuthModule,
     UsersModule,
     TicketsModule,
+    CommentsModule,
+    TagsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
