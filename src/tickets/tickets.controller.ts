@@ -17,6 +17,8 @@ import { TicketsService } from './tickets.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { QueryTicketsDto } from './dto/query-tickets.dto';
+import { AssignTicketDto } from './dto/assign-ticket.dto';
+import { ChangeStatusDto } from './dto/change-status.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -38,10 +40,7 @@ export class TicketsController {
   }
 
   @Get()
-  findAll(
-    @Req() req: AuthenticatedRequest,
-    @Query() query: QueryTicketsDto,
-  ) {
+  findAll(@Req() req: AuthenticatedRequest, @Query() query: QueryTicketsDto) {
     return this.ticketsService.findAllForUser(req.user, query);
   }
 
@@ -71,5 +70,56 @@ export class TicketsController {
     @Req() req: AuthenticatedRequest,
   ) {
     await this.ticketsService.remove(id, req.user);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.AGENT, UserRole.ADMIN)
+  @Post(':id/assign')
+  assign(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: AssignTicketDto,
+  ) {
+    return this.ticketsService.assign(id, req.user, dto);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.AGENT, UserRole.ADMIN)
+  @Post(':id/status')
+  changeStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: ChangeStatusDto,
+  ) {
+    return this.ticketsService.changeStatus(id, req.user, dto);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.AGENT, UserRole.ADMIN)
+  @Post(':id/tags')
+  addTag(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('tagId', ParseIntPipe) tagId: number,
+  ) {
+    return this.ticketsService.addTag(id, tagId);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.AGENT, UserRole.ADMIN)
+  @Delete(':id/tags/:tagId')
+  @HttpCode(204)
+  async removeTag(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('tagId', ParseIntPipe) tagId: number,
+  ) {
+    await this.ticketsService.removeTag(id, tagId);
+  }
+
+  @Get(':id/events')
+  findEvents(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.ticketsService.findEvents(id, req.user);
   }
 }
