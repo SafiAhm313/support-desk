@@ -52,6 +52,7 @@ export class TicketsController {
     return this.ticketsService.findOneForUser(id, req.user);
   }
 
+  @HttpCode(200)
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -74,6 +75,7 @@ export class TicketsController {
 
   @UseGuards(RolesGuard)
   @Roles(UserRole.AGENT, UserRole.ADMIN)
+  @HttpCode(200)
   @Post(':id/assign')
   assign(
     @Param('id', ParseIntPipe) id: number,
@@ -85,6 +87,7 @@ export class TicketsController {
 
   @UseGuards(RolesGuard)
   @Roles(UserRole.AGENT, UserRole.ADMIN)
+  @HttpCode(200)
   @Post(':id/status')
   changeStatus(
     @Param('id', ParseIntPipe) id: number,
@@ -96,6 +99,7 @@ export class TicketsController {
 
   @UseGuards(RolesGuard)
   @Roles(UserRole.AGENT, UserRole.ADMIN)
+  @HttpCode(200)
   @Post(':id/tags')
   addTag(
     @Param('id', ParseIntPipe) id: number,

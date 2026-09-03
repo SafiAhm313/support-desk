@@ -22,7 +22,8 @@
     "typeorm": "typeorm -d src/data-source.ts",
     "migration:generate": "npx tsx ./node_modules/typeorm/cli.js -d src/data-source.ts migration:generate src/migrations/InitSchema",
     "migration:run": "npx tsx ./node_modules/typeorm/cli.js -d src/data-source.ts migration:run",
-    "migration:revert": "npx tsx ./node_modules/typeorm/cli.js -d src/data-source.ts migration:revert"
+    "migration:revert": "npx tsx ./node_modules/typeorm/cli.js -d src/data-source.ts migration:revert",
+    "seed": "npx tsx src/seed/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",
