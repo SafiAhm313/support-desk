@@ -24,6 +24,7 @@ import {
 } from './dto/query-tickets.dto';
 import { computeDueAt } from './due-date.util';
 import { isValidTransition, requiresNoteToReopen } from './ticket-status.util';
+import { canUserAccessTicket } from './ticket-visibility.util';
 
 @Injectable()
 export class TicketsService {
@@ -72,17 +73,12 @@ export class TicketsService {
     const qb = this.baseQuery().where('ticket.id = :id', { id });
     this.applyVisibility(qb, user);
     const ticket = await qb.getOne();
-    if (!ticket) {
-      // Deliberately 404, never 403 — a customer must not learn the
-      // ticket exists at all (Rule 2).
+    if (!ticket || !canUserAccessTicket(user, ticket)) {
       throw new NotFoundException('Ticket not found');
     }
     return ticket;
   }
 
-  // For agent/admin-only operations (assign, status, tag) where the
-  // endpoint is already role-guarded, so no customer-visibility scoping
-  // is needed — just existence.
   async findByIdUnscoped(id: number): Promise<Ticket> {
     const ticket = await this.baseQuery()
       .where('ticket.id = :id', { id })
@@ -136,8 +132,6 @@ export class TicketsService {
       );
     }
 
-    // total is counted before paging — count on the filtered query
-    // builder before .skip()/.take() are applied.
     const total = await qb.getCount();
 
     const sortField = query.sort ?? TicketSortField.CREATED_AT;
@@ -210,9 +204,7 @@ export class TicketsService {
     const to = dto.status;
 
     if (!isValidTransition(from, to)) {
-      throw new ConflictException(
-        `Cannot transition from ${from} to ${to}`,
-      );
+      throw new ConflictException(`Cannot transition from ${from} to ${to}`);
     }
 
     if (requiresNoteToReopen(from, to) && !dto.note?.trim()) {
@@ -257,8 +249,6 @@ export class TicketsService {
   }
 
   async findEvents(id: number, user: User): Promise<TicketEvent[]> {
-    // Confirms the ticket exists and is visible to this user first —
-    // reuses the same 404-not-403 visibility check as everywhere else.
     await this.findOneForUser(id, user);
     return this.ticketEventsRepository.find({
       where: { ticket: { id } },
