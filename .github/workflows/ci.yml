@@ -47,6 +47,9 @@ jobs:
       - name: Run migrations
         run: npm run migration:run
 
+      - name: Seed the database
+        run: npm run seed
+
       - name: Build
         run: npm run build
 
