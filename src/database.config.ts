@@ -1,6 +1,12 @@
 // Single source of truth for the database connection.
-// Production (Neon, Render): set DATABASE_URL and SSL is turned on.
+// Production (Neon, Vercel): set DATABASE_URL and SSL is turned on.
 // Local development: leave DATABASE_URL unset and use the DB_* variables.
+
+// TypeORM loads the "pg" driver with a dynamic require() at runtime, which
+// Vercel'\''s bundler cannot see when tracing static imports for the function.
+// This import forces pg into the deployed bundle.
+import 'pg';
+
 export function databaseConnection() {
   const url = process.env.DATABASE_URL;
 
