@@ -3,6 +3,11 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/http-exception.filter';
 
+const ALLOWED_ORIGINS = [
+  'http://localhost:3000',
+  'https://support-desk-client-iota.vercel.app',
+];
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -20,7 +25,7 @@ async function bootstrap() {
 
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  app.enableCors({ origin: 'http://localhost:3000' });
+  app.enableCors({ origin: ALLOWED_ORIGINS });
 
   await app.listen(process.env.PORT ?? 3000);
 }
