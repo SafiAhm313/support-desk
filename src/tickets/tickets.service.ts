@@ -98,8 +98,9 @@ export class TicketsService {
     pageSize: number;
     total: number;
   }> {
-    const page = query.page ?? 1;
-    const pageSize = query.pageSize ?? 20;
+    const page = Math.max(query.page ?? 1, 1);
+    const MAX_PAGE_SIZE = 100;
+    const pageSize = Math.min(Math.max(query.pageSize ?? 20, 1), MAX_PAGE_SIZE);
 
     const qb = this.baseQuery();
     this.applyVisibility(qb, user);
@@ -257,3 +258,4 @@ export class TicketsService {
     });
   }
 }
+
