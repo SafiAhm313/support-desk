@@ -13,14 +13,21 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
-    const status =
-      exception instanceof HttpException
-        ? exception.getStatus()
+    const isPayloadTooLarge =
+      !(exception instanceof HttpException) &&
+      (exception as { status?: number; type?: string })?.status === 413 ||
+      (exception as { type?: string })?.type === 'entity.too.large';
+
+    const status = exception instanceof HttpException
+      ? exception.getStatus()
+      : isPayloadTooLarge
+        ? HttpStatus.PAYLOAD_TOO_LARGE
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const message =
-      exception instanceof HttpException
-        ? exception.getResponse()
+    const message = exception instanceof HttpException
+      ? exception.getResponse()
+      : isPayloadTooLarge
+        ? 'Payload too large'
         : 'Internal server error';
 
     response.status(status).json({

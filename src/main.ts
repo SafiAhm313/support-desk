@@ -1,5 +1,8 @@
 import { NestFactory, Reflector } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import helmet from 'helmet';
+import { json } from 'express';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/http-exception.filter';
 
@@ -9,7 +12,11 @@ const ALLOWED_ORIGINS = [
 ];
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.use(helmet());
+  app.disable('x-powered-by');
+  app.use(json({ limit: '100kb' }));
 
   app.useGlobalPipes(
     new ValidationPipe({
