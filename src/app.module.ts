@@ -13,6 +13,7 @@ import { Ticket } from './tickets/ticket.entity';
 import { TicketEvent } from './tickets/ticket-event.entity';
 import { Comment } from './comments/comment.entity';
 import { Tag } from './tags/tag.entity';
+import { LoginAttempt } from './auth/login-attempt.entity';
 import { databaseConnection } from './database.config';
 
 @Module({
@@ -20,7 +21,7 @@ import { databaseConnection } from './database.config';
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       ...databaseConnection(),
-      entities: [User, Ticket, TicketEvent, Comment, Tag],
+      entities: [User, Ticket, TicketEvent, Comment, Tag, LoginAttempt],
     }),
     AuthModule,
     UsersModule,
