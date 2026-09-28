@@ -179,3 +179,45 @@ describe('Support Desk end-to-end', () => {
       .expect(404);
   });
 });
+describe('Production hardening', () => {
+  it('GET /health answers 200 with no token', async () => {
+    const res = await request(BASE_URL).get('/health').expect(200);
+    expect(res.body.status).toBe('ok');
+    expect(res.body.database).toBe('ok');
+  });
+
+  it('rate limits failed logins: the 6th attempt in the window answers 429', async () => {
+    const email = `e2e-ratelimit-${Date.now()}@test.com`;
+
+    for (let attempt = 1; attempt <= 5; attempt++) {
+      await request(BASE_URL)
+        .post('/auth/login')
+        .send({ email, password: 'wrong-password' })
+        .expect(401);
+    }
+
+    const res = await request(BASE_URL)
+      .post('/auth/login')
+      .send({ email, password: 'wrong-password' })
+      .expect(429);
+
+    expect(res.body.statusCode).toBe(429);
+  });
+
+  it('a malformed request body returns a clean envelope with no stack trace or SQL', async () => {
+    const res = await request(BASE_URL)
+      .post('/auth/login')
+      .set('Content-Type', 'application/json')
+      .send('{ this is not valid json')
+      .expect(400);
+
+    const bodyText = JSON.stringify(res.body);
+
+    expect(Object.keys(res.body).sort()).toEqual(
+      ['message', 'statusCode', 'timestamp'].sort(),
+    );
+    expect(bodyText).not.toMatch(/at .*\.(ts|js):\d+/); // no stack trace frames
+    expect(bodyText.toUpperCase()).not.toMatch(/SELECT .* FROM/); // no SQL
+    expect(bodyText).not.toMatch(/node_modules/); // no internal file paths
+  });
+});
