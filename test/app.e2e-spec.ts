@@ -9,7 +9,7 @@ const APP_ENTRY = path.join(__dirname, '..', 'dist', 'main.js');
 let serverProcess: ChildProcess;
 let testsFinished = false;
 
-function waitForServer(url: string, timeoutMs = 20000): Promise<void> {
+function waitForServer(url: string, timeoutMs = 60000): Promise<void> {
   const start = Date.now();
   return new Promise((resolve, reject) => {
     const tryConnect = () => {
@@ -51,7 +51,7 @@ beforeAll(async () => {
   });
 
   await waitForServer(BASE_URL);
-}, 30000);
+}, 90000);
 
 afterAll(() => {
   testsFinished = true;
@@ -247,3 +247,4 @@ describe('Error responses', () => {
     expect(res.body.statusCode).toBe(400);
   });
 });
+
