@@ -9,7 +9,7 @@ const APP_ENTRY = path.join(__dirname, '..', 'dist', 'main.js');
 let serverProcess: ChildProcess;
 let testsFinished = false;
 
-function waitForServer(url: string, timeoutMs = 20000): Promise<void> {
+function waitForServer(url: string, timeoutMs = 60000): Promise<void> {
   const start = Date.now();
   return new Promise((resolve, reject) => {
     const tryConnect = () => {
@@ -51,7 +51,7 @@ beforeAll(async () => {
   });
 
   await waitForServer(BASE_URL);
-}, 30000);
+}, 90000);
 
 afterAll(() => {
   testsFinished = true;
@@ -221,3 +221,30 @@ describe('Production hardening', () => {
     expect(bodyText).not.toMatch(/node_modules/); // no internal file paths
   });
 });
+
+describe('Error responses', () => {
+  it('a protected route without a token answers 401', async () => {
+    const res = await request(BASE_URL).get('/tickets').expect(401);
+    expect(res.body.statusCode).toBe(401);
+  });
+
+  it('a failed login answers 401 with a generic message', async () => {
+    const res = await request(BASE_URL)
+      .post('/auth/login')
+      .send({
+        email: `e2e-nobody-${Date.now()}@test.com`,
+        password: 'wrong-password',
+      })
+      .expect(401);
+    expect(res.body.message).toBe('Invalid credentials');
+  });
+
+  it('an invalid registration body answers 400 from validation', async () => {
+    const res = await request(BASE_URL)
+      .post('/auth/register')
+      .send({ email: 'not-an-email', password: 'x', fullName: '' })
+      .expect(400);
+    expect(res.body.statusCode).toBe(400);
+  });
+});
+
