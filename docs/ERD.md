@@ -1,11 +1,11 @@
-# Support Desk — Entity Relationship Diagram
+# Support Desk - Entity Relationship Diagram
 
 ```mermaid
 erDiagram
     users ||--o{ tickets : "raises (requester)"
-    users ||--o{ tickets : "assigned to (assignee)"
+    users |o--o{ tickets : "assigned to (assignee)"
     users ||--o{ comments : writes
-    users ||--o{ ticket_events : "acts as (actor)"
+    users |o--o{ ticket_events : "acts as (actor)"
     tickets ||--o{ comments : has
     tickets ||--o{ ticket_events : has
     tickets }o--o{ tags : "tagged via ticket_tags"
