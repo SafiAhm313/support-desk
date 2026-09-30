@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { User } from './user.entity';
 import { UserRole } from '../common/enums';
 
@@ -32,5 +32,12 @@ export class UsersService {
       role: data.role ?? UserRole.CUSTOMER,
     });
     return this.usersRepository.save(user);
+  }
+
+  findAssignable(): Promise<User[]> {
+    return this.usersRepository.find({
+      where: { role: In([UserRole.AGENT, UserRole.ADMIN]) },
+      order: { fullName: 'ASC' },
+    });
   }
 }

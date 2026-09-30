@@ -248,3 +248,46 @@ describe('Error responses', () => {
   });
 });
 
+
+describe('Assignable users', () => {
+  it('rejects an unauthenticated request with 401', async () => {
+    await request(BASE_URL).get('/users/assignable').expect(401);
+  });
+
+  it("rejects a customer's request with 403", async () => {
+    const email = `e2e-assignable-customer-${Date.now()}@test.com`;
+    await request(BASE_URL)
+      .post('/auth/register')
+      .send({ email, password: 'password123', fullName: 'E2E Customer' })
+      .expect(201);
+    const login = await request(BASE_URL)
+      .post('/auth/login')
+      .send({ email, password: 'password123' })
+      .expect(200);
+
+    await request(BASE_URL)
+      .get('/users/assignable')
+      .set('Authorization', `Bearer ${login.body.accessToken}`)
+      .expect(403);
+  });
+
+  it('lets an agent list agents and admins, with no password hash', async () => {
+    const login = await request(BASE_URL)
+      .post('/auth/login')
+      .send({ email: 'agent1@supportdesk.test', password: 'password123' })
+      .expect(200);
+
+    const res = await request(BASE_URL)
+      .get('/users/assignable')
+      .set('Authorization', `Bearer ${login.body.accessToken}`)
+      .expect(200);
+
+    expect(res.body.length).toBeGreaterThan(0);
+    expect(
+      res.body.every((u: any) => u.role === 'agent' || u.role === 'admin'),
+    ).toBe(true);
+    expect(res.body.every((u: any) => u.passwordHash === undefined)).toBe(
+      true,
+    );
+  });
+});
